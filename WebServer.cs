@@ -12,7 +12,7 @@ namespace WebBrowserNet {
         static string localPath;
 
         static IDictionary<string, string> ParseRequisition(string req) {
-            Match m = Regex.Match(req, @"(?<type>^\w*) (?<path>/\S*) HTTP/(?<version>\d\.\d)");
+            Match m = Regex.Match(req, @"(?<type>^\w*) /(?<path>\S*) HTTP/(?<version>\d\.\d)");
             
             string req_type = m.Groups["type"].Value;
             string path = m.Groups["path"].Value;
@@ -28,34 +28,46 @@ namespace WebBrowserNet {
             return dict;
         }
 
-        static void CreateResponse(IDictionary<string, string> req_in) {
+        static byte[] CreateResponse(IDictionary<string, string> req_in) {
             
             HttpRequest response = new HttpRequest();
 
-            byte[] content_data = null;
-            
+            Console.WriteLine(req_in["path"]);
             if (File.Exists(req_in["path"])) {
-                string extension = Path.GetExtension(req_in["path"]);
-                string name = Path.GetFileName(req_in["path"]);
-                content_data = File.ReadAllBytes(req_in["path"]);
+
+                string ext = Path.GetExtension(req_in["path"]);
+                string name = Path.GetFileNameWithoutExtension(req_in["path"]);
+                string extension = ext.Substring(1, ext.Length - 1);
+
+                response.Body = File.ReadAllBytes(req_in["path"]);
                 response.Code = 200;
-                response.ContentLength = content_data.Length;
-                if (extension == "html" || extension == "php" || extension == "txt" || extension == "")
-                    response.ContentType = "text/" + extension;
+                response.ContentLength = response.Body.Length;
+                response.ContentExtension = extension;
+                response.UserAgent = "dominguetiWebServer";
+                if (extension == "html" || extension == "php" || extension == "txt")
+                    response.ContentType = "text";
                 else if (extension == "jpg" || extension == "png" || extension == "tiff" || extension == "svg" || extension == "jpeg")
-                    response.ContentType = "image/" + extension;
+                    response.ContentType = "image";
                 else if (extension == "mp4" || extension == "avi" || extension == "mov" || extension == "flv" || extension == "wvm" || extension == "wav")
-                    response.ContentType = "media/" + extension;
+                    response.ContentType = "media";
                 else
-                    response.ContentType = "binary/" + extension;
-
-                string data = "";
-
+                    response.ContentType = "binary";
             } else {
-                
+                response.Code = 404;
+                response.ContentType = "text";
+                response.ContentExtension = "html";
+                response.Body = File.ReadAllBytes("404.html");
+                response.ContentLength = response.Body.Length;
+                response.Date = DateTime.Now.ToString("ddd, dd MMM yyy HH:mm:ss GMT");
             }
 
-            
+            string send_req = response.ToString();
+            Console.WriteLine(send_req);
+            byte[] data = Encoding.ASCII.GetBytes(send_req);
+            byte[] full_data = new byte[data.Length + response.Body.Length];
+            System.Buffer.BlockCopy(data, 0, full_data, 0, data.Length);
+            System.Buffer.BlockCopy(response.Body, 0, full_data, data.Length, response.Body.Length);
+            return full_data;
         }
 
         static void Main(string[] args) {
@@ -71,9 +83,12 @@ namespace WebBrowserNet {
                 while (client.Available > 0) {
                     client.GetStream().Read(bytes, 0, bytes.Length);
                 }
+
+                IDictionary<string, string> req_metadata = ParseRequisition(Encoding.ASCII.GetString(bytes));
+                byte[] req_data = CreateResponse(req_metadata);
                 
-                Console.WriteLine(Encoding.ASCII.GetString(bytes));
-                Console.WriteLine("Size: {0}", bytes.Length);
+                client.GetStream().Write(req_data, 0, req_data.Length);
+                client.GetStream().Flush();
                 client.Close();
 
             } catch (SocketException e) {

@@ -59,6 +59,17 @@ namespace WebBrowserNet {
             ContentExtension = content_extension;
             ContentType = content_type;
         }
+
+        public override string ToString() {
+            string s = string.Empty;
+            string message = string.Empty;
+            if (Code == 200)
+                message = "OK";
+            else if (Code == 404)
+                message = "Page or file not found on this server.";
+            s += string.Format("HTTP/{0} {1} {2}\r\nDate: {3}\r\nServer: {4}\r\nContent-Length: {5}\r\nConnection: closed\r\nContent-Type: {6}/{7}\r\nUser-Agent: {8}\r\n\r\n", "1.0", Code, message, Date, UserAgent, ContentLength, ContentType, ContentExtension.Length, UserAgent);
+            return s;
+        }
     }
 
 }
