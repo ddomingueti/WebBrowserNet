@@ -1,0 +1,52 @@
+using System;
+
+namespace WebBrowserNet {
+
+    internal enum Codes {
+        Ok = 200,
+        Created,
+        Accepted,
+        Non_Authoritative_Information,
+        No_Content,
+        Reset_Content,
+        Partial_Content,
+        Multiple_Choices = 300,
+        Moved_Permanently,
+        Founde,
+        See_Other,
+        Not_Modified,
+        Temporary_Redirect,
+        Permanent_Redirect,
+        Bad_Request = 400,
+        Unauthorized,
+        Forbidden = 403,
+        Not_Found,
+        Method_Not_Allowed,
+        Not_Acceptable,
+        Proxy_Auth_Required,
+        Request_Timeout,
+        Conflict,
+        Gone,
+        Length_Required,
+        Precondition_Failed,
+        Payload_Too_Large,
+        URI_Too_Long,
+        Unsuported_Media_Type,
+        Range_Not_Satisfiable,
+        Expectation_Failed,
+        Unprocessed_Entity = 422,
+        Too_Early = 425,
+        Upgrade_Required,
+        Precondition_Required = 428,
+        Too_Many_Requests,
+        Request_Header_Too_Large = 431,
+        Internal_Error = 500,
+        Not_Implemented,
+        Bad_Gateway,
+        Service_Unavaiable,
+        Gateway_Timeout,
+        HTTP_Version_Not_Suported,
+        Network_Auth_Required = 511
+    }
+
+}
