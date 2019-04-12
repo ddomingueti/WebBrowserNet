@@ -90,7 +90,7 @@ namespace WebBrowserNet {
             
             server.Start();
             while (true) {
-                Console.WriteLine("Server running .... ");    
+                Console.WriteLine("Server running on port 80");    
                 TcpClient client = server.AcceptTcpClient();
                 Thread thread = new Thread(() => ClientThread(client));
                 thread.Start();

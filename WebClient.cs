@@ -30,6 +30,10 @@ namespace WebBrowserNet {
         
         static void Main(string[] args) {
             try {
+                if (args.Length == 0) {
+                    throw new ArgumentException("Invalid input argument. Example input: dotnet run 'www.website.com/path/index.html'");
+                }
+                
                 IDictionary<string, string> dict = ParseInputHost(args[0]);
 
                 Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -62,10 +66,11 @@ namespace WebBrowserNet {
                 FileStream fs = File.Create(http_result.FileName + "." + http_result.ContentExtension);
                 fs.Write(http_result.Body, 0, http_result.Body.Length);
                 fs.Close();
+                Console.WriteLine("Requisition success.");
             } catch (ArgumentException e) {
                 Console.WriteLine(e.Message);
             } catch (SocketException e) {
-                Console.WriteLine(e.Message);                
+                Console.WriteLine(e.Message);   
             }
         }
     }
