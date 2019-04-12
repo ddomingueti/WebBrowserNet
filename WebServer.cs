@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -7,15 +8,14 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace WebBrowserNet {
-    
+
     public class WebServer {
         static string localPath;
-
         static IDictionary<string, string> ParseRequisition(string req) {
             Match m = Regex.Match(req, @"(?<type>^\w*) /(?<path>\S*) HTTP/(?<version>\d\.\d)");
             
             string req_type = m.Groups["type"].Value;
-            string path = m.Groups["path"].Value;
+            string path = localPath + m.Groups["path"].Value;
             string version_protocol = m.Groups["version"].Value;
             
             if (path == "/")
@@ -43,7 +43,7 @@ namespace WebBrowserNet {
                 response.Code = 200;
                 response.ContentLength = response.Body.Length;
                 response.ContentExtension = extension;
-                response.UserAgent = "dominguetiWebServer";
+                response.Server = "dominguetiWebServer";
                 if (extension == "html" || extension == "php" || extension == "txt")
                     response.ContentType = "text";
                 else if (extension == "jpg" || extension == "png" || extension == "tiff" || extension == "svg" || extension == "jpeg")
@@ -56,10 +56,10 @@ namespace WebBrowserNet {
                 response.Code = 404;
                 response.ContentType = "text";
                 response.ContentExtension = "html";
-                response.Body = File.ReadAllBytes("404.html");
+                response.Body = File.ReadAllBytes("www/404.html");
                 response.ContentLength = response.Body.Length;
-                response.Date = DateTime.Now.ToString("ddd, dd MMM yyy HH:mm:ss GMT");
             }
+            response.Date = DateTime.Now.ToString("ddd, dd MMM yyy HH:mm:ss GMT");
 
             string send_req = response.ToString();
             Console.WriteLine(send_req);
@@ -69,15 +69,8 @@ namespace WebBrowserNet {
             System.Buffer.BlockCopy(response.Body, 0, full_data, data.Length, response.Body.Length);
             return full_data;
         }
-
-        static void Main(string[] args) {
-            localPath = System.IO.Directory.GetCurrentDirectory();
-            TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 80);
-            
-            server.Start();
-            try {
-                Console.WriteLine("Server running .... ");    
-                TcpClient client = server.AcceptTcpClient();
+        
+        static void ClientThread(TcpClient client) {
                 byte[] bytes = new byte[client.Available];
                 Console.WriteLine("Client Connected {0}", client.Available);
                 while (client.Available > 0) {
@@ -90,12 +83,18 @@ namespace WebBrowserNet {
                 client.GetStream().Write(req_data, 0, req_data.Length);
                 client.GetStream().Flush();
                 client.Close();
-
-            } catch (SocketException e) {
-                Console.WriteLine(e.Message);
+        }
+        static void Main(string[] args) {
+            localPath = System.IO.Directory.GetCurrentDirectory() + "/www/";
+            TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 80);
+            
+            server.Start();
+            while (true) {
+                Console.WriteLine("Server running .... ");    
+                TcpClient client = server.AcceptTcpClient();
+                Thread thread = new Thread(() => ClientThread(client));
+                thread.Start();
             }
         }
-    
-    
     }
 }

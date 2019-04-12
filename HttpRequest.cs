@@ -11,10 +11,19 @@ namespace WebBrowserNet {
         public byte[] Body { get; set; }
         public string RequestType { get; }
         public string UserAgent { get; set; }
+        public string Server { get; set; }
         public string Date { get; set; }
         public string FileName { get; set; }
 
-        internal HttpRequest() { }
+        internal HttpRequest() { 
+            ContentType = string.Empty;
+            ContentExtension = string.Empty;
+            RequestType = string.Empty;
+            UserAgent = string.Empty;
+            Server = string.Empty;
+            Date = string.Empty;
+            FileName = string.Empty;
+        }
         internal HttpRequest(string request_type, string name) { 
             Body = null;
             RequestType = request_type;
@@ -67,7 +76,8 @@ namespace WebBrowserNet {
                 message = "OK";
             else if (Code == 404)
                 message = "Page or file not found on this server.";
-            s += string.Format("HTTP/{0} {1} {2}\r\nDate: {3}\r\nServer: {4}\r\nContent-Length: {5}\r\nConnection: closed\r\nContent-Type: {6}/{7}\r\nUser-Agent: {8}\r\n\r\n", "1.0", Code, message, Date, UserAgent, ContentLength, ContentType, ContentExtension.Length, UserAgent);
+            //string sender = (UserAgent == string.Empty) ? Server : UserAgent;
+            s += string.Format("HTTP/{0} {1} {2}\r\nDate: {3}\r\nServer: {4}\r\nContent-Length: {5}\r\nConnection: closed\r\nContent-Type: {6}/{7}\r\n\r\n", "1.0", Code, message, Date, Server, ContentLength, ContentType, ContentExtension);
             return s;
         }
     }
