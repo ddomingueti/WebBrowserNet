@@ -84,6 +84,12 @@ namespace WebBrowserNet {
             foreach (string s in files) {
                 htmlPage += "<li><a href='" + Path.GetFileName(s) + "'>" + Path.GetFileName(s) + "</a></li>";
             }
+            string[] subDir = Directory.GetDirectories(path);
+            
+            foreach (string s in subDir) {
+                htmlPage += "<li><a href='" + Path.GetFileName(s) + "'>" + Path.GetFileName(s) + "</a></li>";
+            }
+            
             htmlPage += "</div></body></html>";
             return Encoding.ASCII.GetBytes(htmlPage);
         }

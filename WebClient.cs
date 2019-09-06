@@ -54,7 +54,6 @@ namespace WebBrowserNet {
                 string req = "GET " + dict["path"] +  " HTTP/1.1\r\nUser-Agent: DominguetiClient\r\nHost: " + dict["host"] + "\r\n\r\n";
                 byte[] data = Encoding.UTF8.GetBytes(req, 0, req.Length);
                 sock.Send(data, 0, data.Length, 0);
-                Console.WriteLine("Sended req ...");
                 byte[] response = new byte[packet_size]; //byte de leitura do socket
                 List<byte> response_data_bytes = new List<byte>();
                 int amount_read = 0;
@@ -63,7 +62,6 @@ namespace WebBrowserNet {
                     amount_read = sock.Receive(response, 0, response.Length, SocketFlags.None);
                     foreach (byte b in response)
                         response_data_bytes.Add(b);
-                    Console.WriteLine("Readed " + amount_read);
                 } while ( amount_read >= packet_size);
                 sock.Close();
 
@@ -85,7 +83,6 @@ namespace WebBrowserNet {
                 Array.Copy(response, 0, header_data, 0, endHeader);
                 byte[] body_data = new byte[response.Length - endHeader];
                 int size = response.Length - endHeader;
-                Console.WriteLine("Header: " + endHeader + " RL-H = " + size);
                 Array.Copy(response, endHeader, body_data, 0, size);
 
                 response = null;
